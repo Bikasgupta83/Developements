@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Registration</title>
+</head>
+
+<body>
+    <form onsubmit="submitHandler(event)">
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name">
+
+        <br><br>
+
+        <label for="age">Age</label>
+        <input type="number" id="age" name="age">
+
+        <br><br>
+
+        <label for="index">Index To Update/Delete</label>
+        <input type="number" id="index" name="index">
+
+        <br><br>
+
+        <button type="submit">Submit</button>
+        <button type="button" onclick="deleteHandler(event)"
+            style="background-color:red; color:#fff;padding:5px;border:none;cursor:pointer;">Delete</button>
+    </form>
+
+    <div style="margin-top: 20px;">
+        <h3>Stored Users:</h3>
+        <ul id="datas"></ul>
+        <button onclick="getAllData()">Get All Datas</button>
+    </div>
+
+    <script>
+        // Optimize url (POST and PUT)
+        async function submitHandler(event) {
+            event.preventDefault();
+
+            const name = document.getElementById("name").value;
+            const age = document.getElementById("age").value;
+            const idx = document.getElementById("index").value;
+
+            const payload = {
+                name: name,
+                age: parseInt(age),
+            };
+
+            let url = 'http://localhost:8080/api/users';
+            let httpMethod = 'POST';
+            let successMessage = 'Data Submitted Successfully';
+
+            if (idx !== "") {
+                url = `http://localhost:8080/api/users/${idx}`;
+                httpMethod = 'PUT';
+                successMessage = 'Data Updated Successfully';
+            }
+
+            try {
+                let response = await fetch(url, {
+                    method: httpMethod,
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                let result = await response.json();
+                console.log("Server response:", result);
+
+                if (response.ok) {
+                    alert(successMessage);
+                    getAllData();
+                } else {
+                    alert(`Error: ${result.message}`);
+                }
+            } catch (error) {
+                console.log("Submission Failed:", error);
+            }
+        }
+
+        async function deleteHandler(event) {
+            event.preventDefault();
+            const idx = document.getElementById("index").value;
+
+            if (idx === "") {
+                alert("Please type an index value to delete.");
+                return;
+            }
+
+            try {
+                let response = await fetch(`http://localhost:8080/api/users/${idx}`, {
+                    method: "DELETE"
+                });
+                let result = await response.json();
+
+                if (response.ok) {
+                    console.log("Deleted Successfully");
+                    console.log(result);
+                    alert("User Deleted Successfully");
+                    document.getElementById("index").value = "";
+                    getAllData();
+                } else {
+                    alert(`Error: ${result.message}`);
+                }
+            } catch (error) {
+                console.log("Delete operation failed try again", error);
+            }
+        }
+
+        let datasDisplay = document.querySelector("#datas");
+
+        function displayDataList(usersArray) {
+            datasDisplay.innerHTML = "";
+
+            usersArray.forEach((user, i) => {
+                let li = document.createElement("li");
+                li.textContent = `Index [${i}] — Name: ${user.name}, Age: ${user.age}`;
+                datasDisplay.appendChild(li);
+            });
+        }
+
+        async function getAllData() {
+            try {
+                let response = await fetch("http://localhost:8080/api/getAllData");
+                let result = await response.json();
+
+                if (response.ok) {
+                    console.log("Data fetch success", result);
+                    displayDataList(result.data);
+                } else {
+                    console.log("Failed to fetch");
+                }
+            } catch (error) {
+                console.log("Error fetching data:", error);
+            }
+        }
+
+    </script>
+</body>
+
+</html>
