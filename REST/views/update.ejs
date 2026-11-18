@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Partially updating</title>
+</head>
+<body>
+    <form action="/post/update/<%= postFound.id %>" method="POST">
+        <input type="text" name="username" placeholder="Enter username" value="<%= postFound.username %>" readonly><br/><br/>
+        <textarea name="content" placeholder="enter content"><%= postFound.content %></textarea><br/><br/>
+        <button type="submit">Update</button>
+    </form>
+</body>
+</html>
